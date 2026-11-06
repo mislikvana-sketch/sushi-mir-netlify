@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#101010">
+  <title>SUSHI MIR — Смак, який об'єднує</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar"><a class="logo" href="#"><span class="logo-mark">鮨</span><span>SUSHI <b>MIR</b><small>СМАК, ЯКИЙ ОБ'ЄДНУЄ</small></span></a>
+<nav><a href="#menu">Меню</a><a href="#about">Про нас</a><a href="#contacts">Контакти</a></nav>
+<button class="cart-open" id="cartOpen">Кошик <span id="cartCount">0</span></button>
+</header>
+<main>
+<section class="hero"><div class="hero-copy"><span class="eyebrow">FRESH • TASTY • SUSHI</span><h1>Твій світ.<br><em>Твій SUSHI MIR.</em></h1><p>Свіжі роли, яскраві смаки та задоволення в кожному шматочку.</p><a class="primary-link" href="#menu">Обрати суші <span>↗</span></a><div class="hero-note">✦ Готуємо після замовлення</div></div><div class="hero-art"><div class="hero-circle"></div><img src="https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=1000&q=85" alt="Суші сет"></div></section>
+<section class="menu-section" id="menu"><div class="section-head"><div><span class="eyebrow">НАШЕ МЕНЮ</span><h2>Обирай свій смак</h2></div><p>Знайди улюблене або відкрий щось нове</p></div><div class="filters" id="filters"><button class="filter active" data-cat="Усі">Усі</button><button class="filter" data-cat="Роли">Роли</button><button class="filter" data-cat="Сети">Сети</button><button class="filter" data-cat="Суші">Суші</button><button class="filter" data-cat="Напої">Напої</button></div><div class="products" id="products"></div></section>
+<section class="about" id="about"><div><span class="eyebrow">SUSHI MIR</span><h2>Маленька пауза.<br>Велике задоволення.</h2></div><p>Ми віримо, що смачна їжа створює гарний настрій. Обирай улюблені позиції, оформлюй замовлення — і ми подбаємо про решту.</p></section>
+<section class="contacts" id="contacts"><span class="eyebrow">МИ НА ЗВ'ЯЗКУ</span><h2>Є питання?</h2><p>Зателефонуй нам або напиши в Telegram.</p><div class="contact-links"><a href="tel:+380000000000">+38 (000) 000-00-00</a><a href="https://t.me/" target="_blank" rel="noreferrer">Telegram ↗</a></div></section>
+</main>
+<footer>© <span id="year"></span> SUSHI MIR <span>Зроблено з любов'ю до суші 🍣</span></footer>
+<div class="overlay" id="overlay"></div>
+<aside class="drawer" id="cartDrawer"><div class="drawer-head"><h2>Твій кошик</h2><button class="icon-btn" data-close>✕</button></div><div id="cartItems" class="cart-items"></div><div class="cart-bottom"><div class="total"><span>Разом</span><b id="cartTotal">0 ₴</b></div><button class="primary-btn" id="checkoutOpen">Оформити замовлення</button></div></aside>
+<section class="modal" id="checkoutModal"><div class="modal-head"><div><span class="eyebrow">ЩЕ ТРОХИ</span><h2>Оформлення</h2></div><button class="icon-btn" data-close>✕</button></div>
+<form id="orderForm"><label>Ім'я *<input name="name" required placeholder="Як до вас звертатися"></label><label>Номер телефону *<input name="phone" required type="tel" placeholder="+380..." pattern="[+0-9() -]{9,20}"></label><label>Нік у Telegram <span class="optional">(необов'язково)</span><input name="telegram" placeholder="@username"></label><fieldset><legend>Як бажаєте отримати?</legend><label class="radio"><input type="radio" name="receive" value="З собою" checked> З собою</label><label class="radio"><input type="radio" name="receive" value="У закладі"> У закладі</label></fieldset><label>Коментар до замовлення<textarea name="comment" rows="3" placeholder="Побажання, соуси, час..."></textarea></label><div class="form-total"><span>До сплати</span><b id="formTotal">0 ₴</b></div><button class="primary-btn" type="submit" id="submitOrder">Підтвердити замовлення</button><p class="form-hint">Натискаючи кнопку, ви надсилаєте замовлення закладу.</p></form></section>
+<section class="modal admin-modal" id="adminModal"><div class="modal-head"><div><span class="eyebrow">КЕРУВАННЯ</span><h2>Адмін-панель</h2></div><button class="icon-btn" data-close>✕</button></div><p class="admin-warning">Увага: панель без пароля. Зміни товарів зберігаються лише в цьому браузері.</p><form id="productForm" class="admin-form"><label>Назва<input name="name" required placeholder="Філадельфія"></label><label>Категорія<select name="category"><option>Роли</option><option>Сети</option><option>Суші</option><option>Напої</option></select></label><label>Опис<input name="description" placeholder="Лосось, сир, огірок"></label><div class="two-fields"><label>Ціна, ₴<input name="price" type="number" min="1" required></label><label>Вага, г<input name="weight" type="number" min="1" required></label></div><label>Фото товару<input name="image" type="file" accept="image/*"></label><button class="primary-btn" type="submit">＋ Додати товар</button></form><h3 class="admin-list-title">Товари в меню</h3><div id="adminProducts"></div></section>
+<button class="admin-trigger" id="adminTrigger" title="Адмін-панель">⚙</button>
+<div class="toast" id="toast"></div>
+<script src="app.js"></script>
+</body></html>

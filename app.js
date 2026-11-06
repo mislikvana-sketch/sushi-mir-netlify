@@ -1,0 +1,33 @@
+const $=s=>document.querySelector(s);
+const defaultProducts=[
+{id:1,name:"Філадельфія",category:"Роли",description:"Лосось, вершковий сир, огірок, рис, норі",price:245,weight:280,image:"https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=700&q=80"},
+{id:2,name:"Каліфорнія",category:"Роли",description:"Краб, авокадо, огірок, ікра тобіко",price:210,weight:260,image:"https://images.unsplash.com/photo-1553621042-f6e147245754?auto=format&fit=crop&w=700&q=80"},
+{id:3,name:"Дракон",category:"Роли",description:"Вугор, авокадо, сир, соус унагі",price:285,weight:300,image:"https://images.unsplash.com/photo-1617196034796-73dfa7b1fd56?auto=format&fit=crop&w=700&q=80"},
+{id:4,name:"MIR сет",category:"Сети",description:"Асорті з улюблених ролів для компанії",price:699,weight:900,image:"https://images.unsplash.com/photo-1611143669185-af224c5e3252?auto=format&fit=crop&w=700&q=80"},
+{id:5,name:"Нігірі лосось",category:"Суші",description:"Рис та ніжний свіжий лосось",price:85,weight:60,image:"https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?auto=format&fit=crop&w=700&q=80"},
+{id:6,name:"Лимонад",category:"Напої",description:"Освіжаючий домашній лимонад",price:75,weight:330,image:"https://images.unsplash.com/photo-1513558161293-cgl5e9b5e3f4?auto=format&fit=crop&w=700&q=80"}
+];
+let products=JSON.parse(localStorage.getItem("sushimir_products")||"null")||defaultProducts;
+let cart=JSON.parse(localStorage.getItem("sushimir_cart")||"{}"), category="Усі";
+const save=()=>localStorage.setItem("sushimir_products",JSON.stringify(products));
+const money=n=>`${n.toLocaleString("uk-UA")} ₴`;
+function renderProducts(){const list=products.filter(p=>category==="Усі"||p.category===category);$("#products").innerHTML=list.length?list.map(p=>`<article class="product"><img src="${p.image}" alt="${p.name}" onerror="this.src='https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=700'"><div class="product-info"><div class="product-top"><h3>${esc(p.name)}</h3><span class="weight">${p.weight} г</span></div><div class="desc">${esc(p.description||"Смачно та свіжо")}</div><div class="product-bottom"><span class="price">${money(+p.price)}</span><button class="add-btn" onclick="addToCart(${p.id})">＋ Додати</button></div></div></article>`).join(""):'<p>У цій категорії поки немає товарів.</p>'}
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function addToCart(id){cart[id]=(cart[id]||0)+1;saveCart();toast("Додано до кошика")}
+function saveCart(){localStorage.setItem("sushimir_cart",JSON.stringify(cart));renderCart()}
+function total(){return Object.entries(cart).reduce((s,[id,q])=>s+(products.find(p=>p.id==id)?.price||0)*q,0)}
+function renderCart(){let entries=Object.entries(cart).filter(([id,q])=>q>0&&products.some(p=>p.id==id));$("#cartCount").textContent=entries.reduce((s,[,q])=>s+q,0);$("#cartTotal").textContent=money(total());$("#formTotal").textContent=money(total());$("#cartItems").innerHTML=entries.length?entries.map(([id,q])=>{let p=products.find(x=>x.id==id);return `<div class="cart-line"><img src="${p.image}"><div><b>${esc(p.name)}</b><small>${money(p.price)} · ${p.weight} г</small><div class="qty"><button onclick="changeQty(${id},-1)">−</button>${q}<button onclick="changeQty(${id},1)">+</button></div></div><button class="remove" onclick="changeQty(${id},-${q})">✕</button></div>`}).join(""):'<p style="color:#888;text-align:center;margin-top:60px">Кошик поки порожній 🍣</p>'}
+function changeQty(id,n){cart[id]=(cart[id]||0)+n;if(cart[id]<=0)delete cart[id];saveCart()}
+function show(id){$("#overlay").classList.add("show");$(id).classList.add("show")}
+function closeAll(){$("#overlay").classList.remove("show");document.querySelectorAll(".drawer,.modal").forEach(x=>x.classList.remove("show"))}
+function toast(t){$("#toast").textContent=t;$("#toast").classList.add("show");setTimeout(()=>$("#toast").classList.remove("show"),2600)}
+$("#cartOpen").onclick=()=>show("#cartDrawer");$("#checkoutOpen").onclick=()=>{if(!total())return toast("Спочатку додайте товари");closeAll();show("#checkoutModal")};
+document.querySelectorAll("[data-close]").forEach(b=>b.onclick=closeAll);$("#overlay").onclick=closeAll;
+$("#filters").onclick=e=>{let b=e.target.closest("[data-cat]");if(!b)return;category=b.dataset.cat;document.querySelectorAll(".filter").forEach(x=>x.classList.toggle("active",x===b));renderProducts()};
+$("#orderForm").onsubmit=async e=>{e.preventDefault();if(!total())return toast("Кошик порожній");let f=new FormData(e.target),items=Object.entries(cart).map(([id,q])=>{let p=products.find(x=>x.id==id);return {name:p.name,price:p.price,weight:p.weight,quantity:q}});let order={name:f.get("name"),phone:f.get("phone"),telegram:f.get("telegram"),receive:f.get("receive"),comment:f.get("comment"),items,total:total(),createdAt:new Date().toLocaleString("uk-UA")};let btn=$("#submitOrder");btn.disabled=true;btn.textContent="Надсилаємо...";
+try{let r=await fetch("/.netlify/functions/order",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(order)});let data=await r.json();if(!r.ok)throw new Error(data.error||"Помилка надсилання");toast("Замовлення надіслано! Дякуємо ❤️");cart={};saveCart();e.target.reset();closeAll()}catch(err){toast("Не вдалося надіслати. Перевірте налаштування Telegram.");console.error(err)}finally{btn.disabled=false;btn.textContent="Підтвердити замовлення"}};
+$("#adminTrigger").onclick=()=>{renderAdmin();show("#adminModal")};
+$("#productForm").onsubmit=async e=>{e.preventDefault();let f=new FormData(e.target),file=f.get("image"),image="https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=700";if(file&&file.size){if(file.size>1500000)return toast("Фото завелике. Максимум 1,5 МБ");image=await new Promise((res,rej)=>{let r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file)})}products.unshift({id:Date.now(),name:f.get("name"),category:f.get("category"),description:f.get("description"),price:+f.get("price"),weight:+f.get("weight"),image});save();renderProducts();renderAdmin();e.target.reset();toast("Товар додано")};
+function renderAdmin(){$("#adminProducts").innerHTML=products.map(p=>`<div class="admin-row"><span><b>${esc(p.name)}</b> · ${money(+p.price)} · ${p.weight} г</span><button onclick="deleteProduct(${p.id})">Видалити</button></div>`).join("")||"Товарів немає"}
+function deleteProduct(id){if(!confirm("Видалити цей товар?"))return;products=products.filter(p=>p.id!==id);delete cart[id];save();saveCart();renderProducts();renderAdmin();toast("Товар видалено")}
+$("#year").textContent=new Date().getFullYear();renderProducts();renderCart();
